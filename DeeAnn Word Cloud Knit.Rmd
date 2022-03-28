@@ -1,0 +1,132 @@
+---
+title: "DeeAnn Word Cloud"
+author: "Mark Perchaluk"
+date: "3/27/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Install Packages
+```{r}
+#install.packages("tm")
+#install.packages("SnowballC")
+#install.packages("wordcloud")
+#install.packages("RColorBrewer")
+```
+
+## Load packages
+```{r warning=FALSE}
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+```
+
+## Load text file from own device
+```{r}
+text <-  readLines(file.choose())
+```
+
+## Load data as corpus
+```{r}
+doc <- Corpus(VectorSource(text))
+```
+
+## Inspect document
+```{r}
+inspect(doc)
+```
+## There's some cleaning that needs to be done before we visualize, such as:
+### Removing special characters
+```{r}
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+doc <- tm_map(doc, toSpace, "/")
+doc <- tm_map(doc, toSpace, "@")
+doc <- tm_map(doc, toSpace, "\\|")
+```
+### Changing all text to lowercase
+```{r}
+doc <-  tm_map(doc, content_transformer(tolower))
+```
+
+### Removing numbers
+```{r}
+doc <- tm_map(doc, removeNumbers)
+```
+
+### Removing Stopwords
+```{r}
+doc <- tm_map(doc, removeWords, stopwords("english"))
+```
+
+### Removing punctuation
+```{r}
+doc <-  tm_map(doc, removePunctuation)
+```
+
+### Removing extra whitespace
+```{r}
+doc <- tm_map(doc, stripWhitespace)
+```
+##Let's check the document again to confirm our steps
+```{r}
+inspect(doc)
+```
+
+## Perfect. Now we can start to create our matrix for visualization
+```{r}
+matrix <- TermDocumentMatrix(doc)
+```
+
+## Turn table in matrix
+```{r}
+m <- as.matrix(matrix)
+```
+
+## Sort the matrix
+```{r}
+sorted_matrix <- sort(rowSums(m), decreasing = TRUE)
+```
+
+# Now we can turn the matrix into a DataFrame
+```{r}
+matrix_df <- data.frame(word = names(sorted_matrix), freq=sorted_matrix)
+```
+
+## Lets check the first 10 values of the DataFrame out
+```{r}
+head(matrix_df, 10)
+```
+
+## Looks like we need to take out some words that don't matter for our data. We can delete by rows
+```{r}
+matrix_df_v2 <- matrix_df[-c(2, 7, 8, 10), ]
+```
+
+## Lets check the top 10 values again
+```{r}
+head(matrix_df_v2, 10)
+```
+
+## '*like*' and '*wanna*' should be taken out too
+```{r}
+matrix_df_v3 <- matrix_df_v2[-c(9, 10), ]
+```
+
+## Check the top again
+```{r}
+head(matrix_df_v3, 10)
+```
+
+## Now we can create our wordcloud
+```{r warning=FALSE}
+set.seed(1234)
+wordcloud(words = matrix_df_v3$word, freq = matrix_df_v3$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+```
