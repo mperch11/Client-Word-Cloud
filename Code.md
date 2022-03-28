@@ -1,4 +1,4 @@
-DeeAnn Word Cloud
+Word Cloud
 ================
 Mark Perchaluk
 3/27/2022
@@ -6,10 +6,10 @@ Mark Perchaluk
 ## Install Packages
 
 ``` r
-#install.packages("tm")
-#install.packages("SnowballC")
-#install.packages("wordcloud")
-#install.packages("RColorBrewer")
+install.packages("tm")
+install.packages("SnowballC")
+install.packages("wordcloud")
+install.packages("RColorBrewer")
 ```
 
 ## Load packages
